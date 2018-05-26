@@ -1,0 +1,54 @@
+resources:
+# REPO of helm Charts
+  - name: helm_k8s_repo
+    type: gitRepo
+    integration: "drship_github"
+    versionTemplate:
+      sourceName: "devops-recipes/cd_k8s_helm"
+      branch: master
+
+# gcloud CLI Config
+  - name: helm_k8s_cli
+    type: cliConfig
+    integration: "drship_kube"
+    versionTemplate:
+      region: "us-west1-a"
+
+jobs:
+  - name: deploy_app_helm_k8s
+    type: runSh
+    dependencyMode: strict
+    steps:
+      - IN: node_app_img_dh # defined here https://github.com/devops-recipes/node_app/blob/master/shippable.yml
+      - IN: helm_k8s_cli
+        switch: off
+      - IN: helm_k8s_repo
+        switch: off
+      - TASK:
+          name: deploy_app
+          runtime:
+            options:
+              env:
+                - CLUSTER_NAME: "cluster"
+                - REGION: "us-west1-a"
+                - APP_LABEL: "helm-k8s-app"
+                - APP_VERSION: "latest"
+                - ENVIRONMENT: "test"
+                - NAMESPACE: "default"
+          script:
+            - gcloud container clusters get-credentials $CLUSTER_NAME --zone $REGION
+            - |
+               export APP_IMG=$(shipctl get_resource_version_key "node_app_img_dh" sourceName)
+               export APP_IMG_TAG=$(shipctl get_resource_version_key "node_app_img_dh" "versionName")
+            - pushd $(shipctl get_resource_state "helm_k8s_repo")/helmCharts
+            - shipctl replace app/Chart.yaml app/values.yaml
+            - helm init --client-only
+            - helm list -a
+            - helm upgrade --install --namespace $NAMESPACE $APP_LABEL ./app
+    on_success:
+      script:
+        - shipctl put_resource_state $JOB_NAME versionName $APP_VERSION
+    flags:
+      - k8s
+      - cd
+      - helm
