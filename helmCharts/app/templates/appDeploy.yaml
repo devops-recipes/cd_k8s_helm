@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Values.feApp.namespace }}
+  name: {{ .Values.feApp.label }}
+spec:
+  replicas: {{ .Values.feApp.replicaCount }}
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.feApp.label }}
+    spec:
+      containers:
+      - name: {{ .Values.feApp.label }}
+        image: {{ .Values.feApp.image.repo }}:{{ .Values.feApp.image.tag }}
+        ports:
+        - containerPort: {{ .Values.feApp.port }}
+        resources:
+          requests:
+            cpu: {{ .Values.feApp.resources.requests.cpu }}
+          limits:
+            cpu: {{ .Values.feApp.resources.limits.cpu }}

@@ -1,0 +1,21 @@
+environment: ${ENVIRONMENT}
+appVersion: ${APP_VERSION}
+
+feApp:
+  namespace: ${NAMESPACE}
+  label: ${APP_LABEL}
+  replicaCount: 1
+  image:
+    repo: ${APP_IMG}
+    tag: ${APP_IMG_TAG}
+  resources:
+    requests:
+      cpu: 250m
+    limits:
+      cpu: 500m
+  port: 80
+
+feSvc:
+  namespace: ${NAMESPACE}
+  label: ${APP_LABEL}
+  port: 80

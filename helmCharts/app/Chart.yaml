@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart based deplyoment for GKE
+name: ${APP_LABEL}
+version: ${APP_VERSION}
