@@ -41,7 +41,7 @@ jobs:
                export APP_IMG_TAG=$(shipctl get_resource_version_key "node_app_img_dh" "versionName")
             - pushd $(shipctl get_resource_state "helm_k8s_repo")/helmCharts
             - shipctl replace app/Chart.yaml app/values.yaml
-            - helm init --client-only
+            - helm init
             - helm list -a
             - helm upgrade --install --namespace $NAMESPACE $APP_LABEL ./app
     on_success:
