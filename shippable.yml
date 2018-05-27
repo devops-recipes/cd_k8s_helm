@@ -36,7 +36,13 @@ jobs:
                 - ENVIRONMENT: "test"
                 - NAMESPACE: "default"
           script:
-            - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+#            - secret=$(kubectl get sa tiller -o json --namaspace=kube-system | jq -r .secrets[].name)
+#            - kubectl get secret $secret -o json | jq -r '.data["ca.crt"]' | base64 -D # $CA
+#            - kubectl get secret $secret -o json | jq -r '.data["token"]' | base64 -D # $USER_TOKEN
+#            - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+            - kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:ship-deploy
+            - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"ship-deploy"}}}}'
+            - helm init --service-account ship-deploy --upgrade
             - |
                export APP_IMG=$(shipctl get_resource_version_key "node_app_img_dh" sourceName)
                export APP_IMG_TAG=$(shipctl get_resource_version_key "node_app_img_dh" "versionName")
