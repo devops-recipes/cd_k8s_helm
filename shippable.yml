@@ -36,7 +36,6 @@ jobs:
                 - ENVIRONMENT: "test"
                 - NAMESPACE: "default"
           script:
-            - gcloud container clusters get-credentials $CLUSTER_NAME --zone $REGION
             - |
                export APP_IMG=$(shipctl get_resource_version_key "node_app_img_dh" sourceName)
                export APP_IMG_TAG=$(shipctl get_resource_version_key "node_app_img_dh" "versionName")
