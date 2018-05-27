@@ -36,6 +36,7 @@ jobs:
                 - ENVIRONMENT: "test"
                 - NAMESPACE: "default"
           script:
+            - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
             - |
                export APP_IMG=$(shipctl get_resource_version_key "node_app_img_dh" sourceName)
                export APP_IMG_TAG=$(shipctl get_resource_version_key "node_app_img_dh" "versionName")
